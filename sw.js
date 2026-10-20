@@ -5,7 +5,7 @@
    - /assets/* (content-hashed): cache-first. Everything else: network-first with cache fallback.
    - Old app caches (archangel-*, ≠ current) are deleted on activate. Other caches (e.g. the on-device AI model, webllm/*) are left alone.
    All URLs are relative to this script, so it works at / and under a subpath such as /archangel-studio/. */
-const BUILD = 'd8b8114310-mvg8v9qi';
+const BUILD = 'f5a7c4514c-mvg8ywlj';
 const CACHE = `archangel-${BUILD}`;
 const INDEX = new URL('./index.html', self.location).href;
 const OFFLINE = new URL('./offline.html', self.location).href;
