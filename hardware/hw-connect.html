@@ -1,0 +1,37 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connect a device to your Archangel app</title><link rel="icon" href="../favicon-32.png"><style>:root{color-scheme:dark}body{margin:0;background:radial-gradient(1200px 600px at 10% -10%,#2a1a5e 0,transparent 60%),#0b0e1f;color:#e8e6f5;font:16px/1.65 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{max-width:780px;margin:auto;padding:20px 18px 60px}header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}header b{background:linear-gradient(90deg,#8b5cf6,#22d3ee);-webkit-background-clip:text;color:transparent;font-size:18px;margin-right:auto}nav{display:flex;flex-wrap:wrap;gap:6px;width:100%}nav a{padding:6px 11px;border:1px solid rgba(255,255,255,.12);border-radius:99px;font-size:13px;text-transform:capitalize;color:#c9c3ef;text-decoration:none;background:rgba(255,255,255,.04)}h1{font-size:28px;line-height:1.2}h2{color:#fcd34d;font-size:20px;margin-top:28px}a{color:#22d3ee}blockquote{margin:14px 0;padding:10px 14px;border-left:3px solid #8b5cf6;background:rgba(139,92,246,.12);border-radius:8px}pre{overflow-x:auto;background:#15192f;padding:12px;border-radius:10px;font-size:12px;line-height:1.4}.t{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid rgba(255,255,255,.1);padding:6px 8px;text-align:left}th{background:rgba(255,255,255,.06)}footer{margin-top:40px;font-size:13px;color:#9a93c4}</style></head><body><main><header><b>✦ Archangel</b><a href="../">Open the app →</a><nav><a href="./hw-safety.html">safety</a><a href="./hw-boards.html">boards</a><a href="./hw-first-circuits.html">first circuits</a><a href="./hw-connect.html">connect</a><a href="./hw-schematics.html">schematics</a><a href="./hw-ideas.html">ideas</a><a href="../resources/">AI resources</a><a href="../legal/">legal</a></nav></header><h1>Connect a device to your Archangel app</h1>
+<p>Your apps built in Archangel are web apps, so they can talk to hardware through two free browser features — no server, no keys.</p>
+<div class="t"><table><thead><tr><th>Way</th><th>Wire?</th><th>Works in</th><th>Best for</th></tr></thead><tbody><tr><td><strong>Web Serial</strong></td><td>USB cable</td><td>Chrome / Edge on desktop (and Android with some boards)</td><td>Simple, reliable first link</td></tr><tr><td><strong>Web Bluetooth</strong></td><td>Wireless (Bluetooth LE)</td><td>Chrome / Edge on desktop and Android</td><td>ESP32 / Pico W gadgets</td></tr><tr><td><strong>Wi-Fi (HTTP / WebSocket)</strong></td><td>Wireless</td><td>Any browser on the same network</td><td>Home dashboards</td></tr></tbody></table></div>
+<blockquote>Safari on iPhone/iPad doesn't support Web Serial or Web Bluetooth yet — use Wi-Fi, or Chrome on Android or desktop. Both features need <strong>https</strong> (your published app) or localhost, and the user must tap a button to pick the device.</blockquote>
+<h2>The plan</h2>
+<pre><code> [sensor] ──▶ [board] ──USB / Bluetooth──▶ [browser app] ──▶ chart, alert, log</code></pre>
+<p>Keep messages tiny and readable: one line per reading, like <code>temp:22.4</code> or <code>press</code>.</p>
+<h2>A. Web Serial (USB)</h2>
+<p>Board side: just <code>Serial.println(...)</code> at 115200 (see <strong>First circuits</strong>). App side — ask ULTRA to add this, or paste it in:</p>
+<pre><code>async function connectSerial(onLine) {
+  const port = await navigator.serial.requestPort();      // must run from a button tap
+  await port.open({ baudRate: 115200 });
+  const reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = '';
+  for (;;) {
+    const { value, done } = await reader.read(); if (done) break;
+    buf += value; const lines = buf.split('\n'); buf = lines.pop();
+    lines.forEach((l) =&gt; onLine(l.trim()));
+  }
+}
+// Send to the board:  const w = port.writable.getWriter(); await w.write(new TextEncoder().encode('led:on\n'));</code></pre>
+<h2>B. Web Bluetooth (ESP32)</h2>
+<p>Board side: in Arduino IDE open <em>Examples → BLE → BLE</em>notify_ (ESP32 package). It advertises a service and sends a value you can update. App side:</p>
+<pre><code>const SERVICE = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';   // from the example sketch
+const CHAR    = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+async function connectBle(onValue) {
+  const dev = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE] }] });
+  const ch = await (await (await dev.gatt.connect()).getPrimaryService(SERVICE)).getCharacteristic(CHAR);
+  ch.addEventListener('characteristicvaluechanged', (e) =&gt; onValue(new TextDecoder().decode(e.target.value)));
+  await ch.startNotifications();
+}</code></pre>
+<h2>C. Wi-Fi</h2>
+<p>An ESP32 or Pico W can serve a tiny web page or JSON on your home network (Arduino example <em>WiFi → SimpleWiFiServer</em>). Your app then fetches <code>http://&lt;device-ip&gt;/data</code>. Keep it on your home network — don't open router ports to the internet.</p>
+<h2>Privacy and safety</h2>
+<ul><li>Wi-Fi passwords go in the board's code on <strong>your</strong> computer only — never paste them into chat, shared apps or public repos.</li><li>Ask before you record anything about other people (sound, video, location).</li><li>Show a clear "Connected / Disconnected" state and a Disconnect button in your app.</li></ul>
+<h2>Ask ULTRA</h2>
+<blockquote>"Build me a web app with a Connect button that reads lines like <code>temp:22.4</code> over Web Serial and shows a live chart and the last 50 readings."</blockquote><footer>© 2026 Michael Manning — Archangel Angelic Code's. All rights reserved. General guidance only — low-voltage projects only, never mains power. Not endorsements.</footer></main></body></html>

@@ -1,0 +1,32 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Schematics &amp; blueprints</title><link rel="icon" href="../favicon-32.png"><style>:root{color-scheme:dark}body{margin:0;background:radial-gradient(1200px 600px at 10% -10%,#2a1a5e 0,transparent 60%),#0b0e1f;color:#e8e6f5;font:16px/1.65 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{max-width:780px;margin:auto;padding:20px 18px 60px}header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}header b{background:linear-gradient(90deg,#8b5cf6,#22d3ee);-webkit-background-clip:text;color:transparent;font-size:18px;margin-right:auto}nav{display:flex;flex-wrap:wrap;gap:6px;width:100%}nav a{padding:6px 11px;border:1px solid rgba(255,255,255,.12);border-radius:99px;font-size:13px;text-transform:capitalize;color:#c9c3ef;text-decoration:none;background:rgba(255,255,255,.04)}h1{font-size:28px;line-height:1.2}h2{color:#fcd34d;font-size:20px;margin-top:28px}a{color:#22d3ee}blockquote{margin:14px 0;padding:10px 14px;border-left:3px solid #8b5cf6;background:rgba(139,92,246,.12);border-radius:8px}pre{overflow-x:auto;background:#15192f;padding:12px;border-radius:10px;font-size:12px;line-height:1.4}.t{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid rgba(255,255,255,.1);padding:6px 8px;text-align:left}th{background:rgba(255,255,255,.06)}footer{margin-top:40px;font-size:13px;color:#9a93c4}</style></head><body><main><header><b>✦ Archangel</b><a href="../">Open the app →</a><nav><a href="./hw-safety.html">safety</a><a href="./hw-boards.html">boards</a><a href="./hw-first-circuits.html">first circuits</a><a href="./hw-connect.html">connect</a><a href="./hw-schematics.html">schematics</a><a href="./hw-ideas.html">ideas</a><a href="../resources/">AI resources</a><a href="../legal/">legal</a></nav></header><h1>Schematics &amp; blueprints</h1>
+<p>A <strong>schematic</strong> shows how parts connect, not where they sit. A <strong>blueprint</strong> (or wiring plan) adds the physical layout — which breadboard row, which pin.</p>
+<h2>Common symbols</h2>
+<pre><code> Battery / supply   ─┤|─      (long line = +)
+ Ground             ⏚  or  GND
+ Resistor           ─[ R ]─   (value in Ω, kΩ)
+ LED                ─▶|─      (arrow points + to −)
+ Button             ─o o─
+ Capacitor          ─||─      (electrolytic: watch the − stripe)
+ Junction           ──┬──     (wires joined)</code></pre>
+<h2>Reading one, step by step</h2>
+<ol><li>Find <strong>power</strong> and <strong>ground</strong> first — every part connects back to GND.</li><li>Follow each line from a board pin to the part and on to GND or power.</li><li>Check every LED has a resistor, and nothing joins power straight to GND.</li><li>Note the voltage: 3.3 V parts on 3.3 V boards.</li></ol>
+<h2>From schematic to breadboard</h2>
+<pre><code> Breadboard: rows of 5 holes are joined across; the long rails down the sides are + and −.
+
+   + rail ─────────────────────  (3V3)
+   − rail ─────────────────────  (GND)
+   row 10: GPIO15 wire │ 220Ω leg
+   row 14: 220Ω leg    │ LED long leg
+   row 16: LED short leg ── jumper to − rail</code></pre>
+<h2>A device blueprint template</h2>
+<p>Copy this into your project notes:</p>
+<pre><code> Device name:
+ Board:            (Pico / ESP32 / Uno)   Logic: 3.3 V / 5 V
+ Power:            USB 5 V / battery pack (no mains)
+ Inputs:           e.g. button GPIO14, light sensor ADC26
+ Outputs:          e.g. LED GPIO15, servo GPIO13
+ Link to app:      Web Serial / Web Bluetooth / Wi-Fi
+ Messages:         board → app: "temp:22.4"   app → board: "led:on"
+ Safety checks:    resistor on every LED · no 5 V on 3.3 V pins · no short circuits</code></pre>
+<h2>Free tools for drawing them</h2>
+<ul><li><strong>Wokwi</strong> — simulate and share wiring in the browser.</li><li><strong>KiCad</strong> — free, open-source schematic and circuit-board design.</li><li><strong>Fritzing</strong> — friendly breadboard-style diagrams (small fee for downloads; source is open).</li><li>Archangel's <strong>Builder → Blueprint</strong> tab draws your app's schematic; pair it with a device blueprint above.</li></ul><footer>© 2026 Michael Manning — Archangel Angelic Code's. All rights reserved. General guidance only — low-voltage projects only, never mains power. Not endorsements.</footer></main></body></html>
